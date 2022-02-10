@@ -1,12 +1,8 @@
-const BaseService = require("./baseService");
+const BaseService = require('./baseService')
 
 class SkillService extends BaseService {
-  constructor({ repository }) {
-    super({
-      repository,
-    });
-  }
+    constructor({ repository }) {
+        super({ repository })
+    }
 }
-
-module.exports = SkillService;
- 
+module.exports = SkillService

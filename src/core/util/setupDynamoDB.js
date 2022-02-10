@@ -1,13 +1,14 @@
-const dynamoose = require("dynamoose");
+const dynamoose = require('dynamoose')
 
 function setupDynamoDBClient() {
-  if (!process.env.IS_LOCAL) return;
+    if (!process.env.IS_LOCAL)
+        return;
+    
+    const host = process.env.LOCALSTACK_HOST
+    const port = process.env.DYNAMODB_PORT
 
-  const host = process.env.LOCALSTACK_HOST;
-  const port = process.env.DYNAMODB_PORT;
-
-  console.log("running locally", host, port);
-  dynamoose.aws.ddb.local(`http://${host}:${port}`);
+    console.log('running locally', host, port)
+    dynamoose.local(`http://${host}:${port}`)
 }
 
-module.exports = setupDynamoDBClient;
+module.exports = setupDynamoDBClient

@@ -76,11 +76,11 @@ async function main() {
     statusCode: 200,
     body: JSON.stringify({
       hero: {
-        hero,
+        heroItem,
         allHeroes,
       },
       skills: {
-        skill,
+        skillItem,
         allSkills,
       },
     }),

@@ -1,12 +1,11 @@
-const BaseRepository = require("./baseRepository");
-const schema = require("./schemas/heroSchema");
-
+const BaseRepository = require('./baseRepository')
+const schema = require('./schemas/heroSchema')
 class HeroRepository extends BaseRepository {
-  constructor() {
-    super({
-      schema,
-    });
-  }
+    constructor() {
+        super({
+            schema
+        })
+    }
 }
 
-module.exports = HeroRepository;
+module.exports = HeroRepository
