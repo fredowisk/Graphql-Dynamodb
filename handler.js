@@ -1,38 +1,90 @@
 "use strict";
 
-const AWS = require("aws-sdk");
+const { ApolloServer, gql } = require("apollo-server-lambda");
+const setupDynamoDBClient = require("./src/core/util/setupDynamoDB");
+setupDynamoDBClient();
 
-function setupDynamoDB() {
-  if (!process.env.IS_LOCAL) return new AWS.DynamoDB.DocumentClient();
+const HeroFactory = require("./src/core/factories/heroFactory");
+const SkillFactory = require("./src/core/factories/skillFactory");
 
-  const host = process.env.LOCALSTACK_HOST || "172.18.0.2";
-  const port = process.env.DYNAMODB_PORT || "4566";
-  console.log("running dynamodb locally!", host, port);
-  return new AWS.DynamoDB({
-    endpoint: new AWS.Endpoint(`http://${host}:${port}`),
+// Construct a schema, using GraphQL schema language
+const typeDefs = gql`
+  type Query {
+    hello: String
+  }
+`;
+
+// Provide resolver functions for your schema fields
+const resolvers = {
+  Query: {
+    hello: () => "Hello world!",
+  },
+};
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
+
+exports.handler = server.createHandler({
+  expressGetMiddlewareOptions: {
+    cors: {
+      origin: "*",
+      credentials: true,
+    },
+  },
+});
+
+async function main() {
+  console.log("creating factories...");
+  const skillFactory = await SkillFactory.createInstance();
+  const heroFactory = await HeroFactory.createInstance();
+
+  console.log("inserting skill item");
+  const skillId = `${new Date().getTime()}`;
+  await skillFactory.create({
+    id: skillId,
+    name: "magic",
+    value: 50,
   });
-}
+  console.log("getting skill item");
 
-module.exports.hello = async (event) => {
-  const dynamodb = setupDynamoDB();
+  const skillItem = await skillFactory.findOne(skillId);
+  console.log("skillItem", skillItem);
 
-  const heroes = await dynamodb
-    .scan({
-      TableName: process.env.HEROES_TABLE,
-    })
-    .promise();
+  const allSkills = await skillFactory.findAll();
+  console.log("allSkills", allSkills);
 
-  const skills = await dynamodb
-    .scan({
-      TableName: process.env.SKILLS_TABLE,
-    })
-    .promise();
+  console.log("-------\n");
+
+  console.log("getting hero item");
+
+  const heroId = `${new Date().getTime()}`;
+  await heroFactory.create({
+    id: heroId,
+    name: "Zatana",
+    skills: [skillId],
+  });
+
+  const heroItem = await heroFactory.findOne(heroId);
+  console.log("hero", heroItem);
+
+  const allHeroes = await heroFactory.findAll();
+  console.log("allHeroes", allHeroes);
 
   return {
     statusCode: 200,
     body: JSON.stringify({
-      skills,
-      heroes,
+      hero: {
+        hero,
+        allHeroes,
+      },
+      skills: {
+        skill,
+        allSkills,
+      },
     }),
   };
-};
+}
+
+module.exports.test = main;

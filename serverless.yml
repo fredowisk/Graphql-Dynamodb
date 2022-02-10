@@ -31,7 +31,7 @@ plugins:
 custom:
   dynamodb:
     stages:
-      - ${self:provider.stage}
+      - test
     start:
       host: ${self:provider.environment.LOCALSTACK_HOST}
       port: ${self:provider.environment.DYNAMODB_PORT}
@@ -50,10 +50,16 @@ custom:
 
 functions:
   hello:
-    handler: handler.hello
+    handler: handler.test
     events:
       - http:
-          path: hello
+          path: test
+          method: any
+  graphql:
+    handler: handler.handler
+    events:
+      - http:
+          path: graphql
           method: any
 
 resources:
